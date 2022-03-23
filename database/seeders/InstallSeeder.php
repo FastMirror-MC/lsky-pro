@@ -19,9 +19,7 @@ class InstallSeeder extends Seeder
     public function run()
     {
         $date = Carbon::now()->format('Y-m-d H:i:s');
-        $array = collect(config('convention.app'))->except([
-            ConfigKey::Group,
-        ])->transform(function ($value, $key) use ($date) {
+        $array = collect(config('convention.app'))->transform(function ($value, $key) use ($date) {
             return [
                 'name' => $key,
                 'value' => is_array($value) ? json_encode($value, JSON_UNESCAPED_UNICODE) : $value,
@@ -37,7 +35,7 @@ class InstallSeeder extends Seeder
                 'name' => '系统默认组&游客组',
                 'is_default' => true,
                 'is_guest' => true,
-                'configs' => config('convention.app.group'),
+                'configs' => config('convention.group'),
             ]);
             // 创建默认策略
             $group->strategies()->create([
