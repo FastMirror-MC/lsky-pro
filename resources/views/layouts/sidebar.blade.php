@@ -1,4 +1,4 @@
-<nav class="transition-all duration-300 -left-[600px] sm:left-0 w-3/4 sm:w-64 h-screen bg-white fixed z-10 shadow-lg sm:shadow-none" :class="{
+<nav class="transition-all duration-300 -left-[600px] sm:left-0 w-3/4 sm:w-64 h-screen bg-white fixed z-10 shadow-custom" :class="{
     '-left-[600px]': ! $store.sidebar.open,
     'left-0': $store.sidebar.open
 }">
@@ -80,9 +80,9 @@
 
         <div id="capacity-progress" class="flex flex-col space-y-2 mb-5 px-5 w-full mt-10">
             <p class="text-gray-700 text-sm">容量使用</p>
-            <progress class="w-full h-1.5" value="{{ Auth::user()->images->sum('size') }}" max="{{ Auth::user()->capacity }}"></progress>
+            <progress class="w-full h-1.5" value="{{ Auth::user()->use_capacity }}" max="{{ Auth::user()->capacity }}"></progress>
             <p class="text-gray-700 text-sm truncate">
-                <span class="used">{{ \App\Utils::formatSize(Auth::user()->images->sum('size') * 1024) }}</span>
+                <span class="used">{{ \App\Utils::formatSize(Auth::user()->use_capacity * 1024) }}</span>
                 /
                 <span class="total">{{ \App\Utils::formatSize(Auth::user()->capacity * 1024) }}</span>
             </p>

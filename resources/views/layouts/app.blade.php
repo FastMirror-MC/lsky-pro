@@ -15,11 +15,8 @@
     @stack('styles')
 
     <!-- Styles -->
-    <link rel="stylesheet" href="{{ asset('css/common.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-
-    <!-- Scripts -->
-    <script src="{{ asset('js/app.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('css/common.css') }}?t=20220427">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?t=20220427">
 </head>
 <body class="font-sans antialiased overflow-hidden">
 <div class="min-h-screen bg-gray-100" x-data x-cloak>
@@ -46,6 +43,8 @@
     </x-container>
 </div>
 </body>
+<!-- Scripts -->
+<script src="{{ asset('js/app.js') }}?t=20220427"></script>
 @include('common.notice')
 <script>
     // 开关组件默认值

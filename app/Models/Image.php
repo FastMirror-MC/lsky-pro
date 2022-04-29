@@ -6,11 +6,10 @@ use App\Enums\GroupConfigKey;
 use App\Enums\ImagePermission;
 use App\Services\ImageService;
 use App\Utils;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -116,6 +115,8 @@ class Image extends Model
                     // 删除物理文件
                     $image->filesystem()->delete($image->pathname);
                     @unlink(public_path($image->getThumbnailPathname()));
+                    // 删除缓存
+                    Cache::forget("image_{$image->key}");
                 } catch (\Throwable $e) {
                     Utils::e($e, '删除物理文件时发生异常');
                 }

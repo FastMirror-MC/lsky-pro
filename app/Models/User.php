@@ -3,11 +3,8 @@
 namespace App\Models;
 
 use App\Enums\ConfigKey;
-use App\Enums\ImagePermission;
-use App\Enums\PastedAction;
-use App\Enums\UserConfigKey;
 use App\Utils;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -27,6 +24,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $remember_token
  * @property boolean $is_adminer
  * @property float $capacity
+ * @property float $use_capacity
  * @property string $url
  * @property Collection $configs
  * @property int $image_num
@@ -108,6 +106,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function avatar(): Attribute
     {
         return new Attribute(fn () => Utils::getAvatar($this->email));
+    }
+
+    public function useCapacity(): Attribute
+    {
+        return new Attribute(fn () => $this->images()->sum('size'));
     }
 
     public function group(): BelongsTo
