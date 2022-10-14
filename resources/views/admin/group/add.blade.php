@@ -79,6 +79,21 @@
                                 <x-input type="text" name="configs[file_naming_rule]" id="file_naming_rule" autocomplete="file_naming_rule" placeholder="请输入文件命名规则" value="{{ $default->get('file_naming_rule') }}" />
                             </div>
 
+                            <div class="col-span-6 sm:col-span-3">
+                                <label for="image_save_quality" class="block text-sm font-medium text-gray-700">图片保存质量</label>
+                                <x-input type="number" name="configs[image_save_quality]" id="image_save_quality" autocomplete="path_naming_rule" placeholder="请输入图片保存质量" value="{{ $default->get('image_save_quality', 100) }}" />
+                            </div>
+
+                            <div class="col-span-6 sm:col-span-3">
+                                <label for="image_save_format" class="block text-sm font-medium text-gray-700">图片转换格式</label>
+                                <x-select id="configs[image_save_format]" name="configs[image_save_format]" autocomplete="image_save_format">
+                                    <option value="">不转换格式</option>
+                                    @foreach($default->get('accepted_file_suffixes') as $extension)
+                                        <option value="{{ strtolower($extension) }}">{{ strtoupper($extension) }}</option>
+                                    @endforeach
+                                </x-select>
+                            </div>
+
                             <div class="col-span-6">
                                 <x-fieldset title="是否默认" faq="设置默认后，新用户注册以后将会属于该默认角色组，且默认组只能有一个。">
                                     <x-switch id="is_default" name="is_default" value="1"></x-switch>
@@ -204,9 +219,15 @@
                         <div data-tab="watermark" class="hidden grid grid-cols-6 gap-6">
                             <p class="mb-3 text-red-600 text-sm"><i class="fas fa-exclamation"></i> 开启水印功能前请注意考虑图片版权问题。</p>
                             <div class="col-span-6 mb-4">
-                                <x-fieldset title="开启水印" faq="请注意，水印功能仅在开启了「原图保护」功能的情况下生效。">
+                                <x-fieldset title="开启水印" faq="请注意，水印模式为动态生成时，仅在开启了「原图保护」功能的情况下生效。">
                                     <x-switch id="configs[is_enable_watermark]" name="configs[is_enable_watermark]" value="1"></x-switch>
                                 </x-fieldset>
+                                <div class="col-span-6 mt-4 mb-4">
+                                    <x-fieldset title="水印模式">
+                                        <x-fieldset-radio id="configs[watermark_configs][mode]_overlay" name="configs[watermark_configs][mode]" value="{{ \App\Enums\Watermark\Mode::Overlay }}" checked>覆盖原图</x-fieldset-radio>
+                                        <x-fieldset-radio id="configs[watermark_configs][mode]_dynamic" name="configs[watermark_configs][mode]" value="{{ \App\Enums\Watermark\Mode::Dynamic }}">动态生成</x-fieldset-radio>
+                                    </x-fieldset>
+                                </div>
                                 <div class="col-span-6 mt-4 mb-4">
                                     <x-fieldset title="水印类型">
                                         <x-fieldset-radio id="configs[watermark_configs][driver]_font" name="configs[watermark_configs][driver]" data-select="watermark" value="font" checked>文字水印</x-fieldset-radio>
@@ -256,7 +277,7 @@
                                     <div class="col-span-6 sm:col-span-3 mb-4">
                                         <label for="configs[watermark_configs][drivers][image][image]" class="block text-sm font-medium text-gray-700"><span class="text-red-600">*</span>水印图片</label>
                                         <x-input type="text" name="configs[watermark_configs][drivers][image][image]" id="configs[watermark_configs][drivers][image][image]" autocomplete="image" placeholder="请输入水印路径，例如：images/lsky.png" />
-                                        <small class="text-yellow-500">请将水印图片放置 {{ public_path() }} 目录下</small>
+                                        <small class="text-yellow-500">请将水印图片放置 {{ storage_path('app/public') }} 目录下</small>
                                     </div>
                                     <div class="col-span-6 sm:col-span-3 mb-4">
                                         <label for="configs[watermark_configs][drivers][image][position]" class="block text-sm font-medium text-gray-700"><span class="text-red-600">*</span>水印位置</label>

@@ -13,11 +13,12 @@ use App\Enums\Scan\TencentOption;
 use App\Enums\UserConfigKey;
 use App\Enums\Watermark\FontOption;
 use App\Enums\Watermark\ImageOption;
+use App\Enums\Watermark\Mode;
 
 return [
     'app' => [
         ConfigKey::AppName => 'Lsky Pro',
-        ConfigKey::AppVersion => 'V 2.0.4',
+        ConfigKey::AppVersion => 'V 2.1',
         ConfigKey::SiteKeywords => 'Lsky Pro,lsky,兰空图床',
         ConfigKey::SiteDescription => 'Lsky Pro, Your photo album on the cloud.',
         ConfigKey::SiteNotice => '',
@@ -75,6 +76,7 @@ return [
             ],
         ],
         GroupConfigKey::WatermarkConfigs => [
+            'mode' => Mode::Overlay,
             'driver' => 'font',
             'drivers' => [
                 'font' => [
@@ -105,6 +107,8 @@ return [
         GroupConfigKey::LimitPerWeek => 600,
         GroupConfigKey::LimitPerMonth => 999,
         GroupConfigKey::AcceptedFileSuffixes => ['jpeg', 'jpg', 'png', 'gif', 'tif', 'bmp', 'ico', 'psd', 'webp'],
+        GroupConfigKey::ImageSaveFormat => '',
+        GroupConfigKey::ImageSaveQuality => 75,
         GroupConfigKey::PathNamingRule => '{Y}/{m}/{d}',
         GroupConfigKey::FileNamingRule => '{uniqid}',
         GroupConfigKey::ImageCacheTtl => 2626560,

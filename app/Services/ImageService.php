@@ -25,6 +25,7 @@ use App\Enums\UserConfigKey;
 use App\Enums\UserStatus;
 use App\Enums\Watermark\FontOption;
 use App\Enums\Watermark\ImageOption;
+use App\Enums\Watermark\Mode;
 use App\Exceptions\UploadException;
 use App\Models\Group;
 use App\Models\Image;
@@ -150,6 +151,34 @@ class ImageService
         // 上传频率限制
         $this->rateLimiter($configs, $request);
 
+        // 图片处理，跳过 ico 于 gif
+        if (! in_array($extension, ['ico', 'gif'])) {
+            // 图片保存质量与格式
+            $quality = $configs->get(GroupConfigKey::ImageSaveQuality, 75);
+            $format = $configs->get(GroupConfigKey::ImageSaveFormat);
+            if ($quality < 100 || $format) {
+                // 获取拓展名，判断是否需要转换
+                $format = $format ?: $extension;
+                $filename = Str::replaceLast($extension, $format, $file->getClientOriginalName());
+                $handleImage = InterventionImage::make($file)->save($format, $quality);
+                $file = new UploadedFile($handleImage->basePath(), $filename, $handleImage->mime());
+                // 重新设置拓展名
+                $extension = $format;
+                $handleImage->destroy();
+            }
+
+            // 是否启用水印，覆盖原图片
+            if (
+                $configs->get(GroupConfigKey::IsEnableWatermark) &&
+                collect($configs->get(GroupConfigKey::WatermarkConfigs))->get('mode', Mode::Overlay) == Mode::Overlay
+            ) {
+                $watermarkImage = $this->stickWatermark($file, collect($configs->get(GroupConfigKey::WatermarkConfigs)));
+                $watermarkImage->save();
+                $file = new UploadedFile($watermarkImage->basePath(), $file->getClientOriginalName(), $file->getMimeType());
+                $watermarkImage->destroy();
+            }
+        }
+
         $filename = $this->replacePathname(
             $configs->get(GroupConfigKey::PathNamingRule).'/'.$configs->get(GroupConfigKey::FileNamingRule), $file,
         );
@@ -263,10 +292,10 @@ class ImageService
                 bucket: $configs->get(S3Option::Bucket),
             ),
             StrategyKey::Oss => new OssAdapter(
-                client: new OssClient(
-                    accessKeyId: $configs->get(OssOption::AccessKeyId),
-                    accessKeySecret: $configs->get(OssOption::AccessKeySecret),
-                    endpoint: $configs->get(OssOption::Endpoint),
+                client: new OssClient($configs->get(
+                    OssOption::AccessKeyId),
+                    $configs->get(OssOption::AccessKeySecret),
+                    $configs->get(OssOption::Endpoint),
                 ),
                 bucket: $configs->get(OssOption::Bucket),
             ),
@@ -323,6 +352,7 @@ class ImageService
                     'endpoint' => $configs->get(MinioOption::Endpoint),
                     'region' => $configs->get(MinioOption::Region),
                     'version' => '2006-03-01',
+                    'bucket_endpoint' => (bool)$configs->get(MinioOption::BucketEndpoint),
                 ]),
                 bucket: $configs->get(MinioOption::Bucket),
             ),
@@ -342,7 +372,7 @@ class ImageService
             'hours' => ['key' => GroupConfigKey::LimitPerHour, 'str' => '小时'],
             'days' => ['key' => GroupConfigKey::LimitPerDay, 'str' => '天'],
             'weeks' => ['key' => GroupConfigKey::LimitPerWeek, 'str' => '周'],
-            'months' => ['key' => GroupConfigKey::LimitPerWeek, 'str' => '月'],
+            'months' => ['key' => GroupConfigKey::LimitPerMonth, 'str' => '月'],
         ];
 
         foreach ($array as $key => $item) {
@@ -538,7 +568,7 @@ class ImageService
                 }
 
                 $img->fit($width, $height, fn($constraint) => $constraint->upsize())->encode('png')->save($pathname);
-
+                $img->destroy();
             } catch (\Throwable $e) {
                 Utils::e($e, '生成缩略图时出现异常');
             }
@@ -606,7 +636,7 @@ class ImageService
             '{md5-16}' => substr(md5(microtime().Str::random()), 0, 16),
             '{str-random-16}' => Str::random(),
             '{str-random-10}' => Str::random(10),
-            '{filename}' => rtrim($file->getClientOriginalName(), '.'.$file->getClientOriginalExtension()),
+            '{filename}' => Str::replaceLast('.'.$file->getClientOriginalExtension(), '', $file->getClientOriginalName()),
             '{uid}' => Auth::check() ? Auth::id() : 0,
         ];
         return str_replace(array_keys($array), array_values($array), $pathname);

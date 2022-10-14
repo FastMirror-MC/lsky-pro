@@ -34,7 +34,7 @@ class ImageRenameRequest extends FormRequest
             'id.numeric' => '图片选择异常',
             'name.required' => '请输入名称',
             'name.max' => '名称长度不能超过 50 个字符',
-            'name.string' => '名称格式不正确'
+            'name.string' => '名称格式不正确',
         ];
     }
 }
